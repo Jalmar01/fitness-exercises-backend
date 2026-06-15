@@ -1,0 +1,13 @@
+###obtener todos los ejercicios (get)
+GET http://localhost:3000/exercises
+
+### crear un nuevo ejercicio (post)
+POST http://localhost:3000/exercises
+Content-Type:  application/json
+
+{
+  "name": "Ok"
+}
+
+### obtener el ejecicio por el id
+GET http://localhost:3000/exercises/0ce715c3-667a-11f1-b6f7-c035324c76e3
