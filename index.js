@@ -2,6 +2,7 @@ import express  from 'express';
 import cors from 'cors';
 import exercisesRouter from './routes/exerceses.js';
 import categoriesRouter from './routes/categories.js';
+import musclesRouter from './routes/muscles.js';
 
 const app = express();
 
@@ -11,6 +12,7 @@ app.use(cors());
 app.use(express.json());
 app.use('/exercises', exercisesRouter);
 app.use('/categories', categoriesRouter);
+app.use('/muscles', musclesRouter);
 
 app.get('/', async (req, res) => {
     res.status(200).json({message: "Welcome to the API gym"})
