@@ -105,9 +105,13 @@ export class AuthController {
       }
     }
 
+    // Rotate refresh token: generate new one, invalidate old one
+    const newRefreshToken = randomUUID();
+    await UserModel.updateRefreshToken({ id: user.id, refreshToken: newRefreshToken });
+
     const accessToken = generateAccessToken(user);
 
-    res.status(200).json({ accessToken });
+    res.status(200).json({ accessToken, refreshToken: newRefreshToken });
   }
 
   /**
