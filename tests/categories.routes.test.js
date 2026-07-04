@@ -9,7 +9,10 @@ vi.mock('../config/db.js', () => ({
   },
 }))
 
+import { generateTestToken } from './helpers/auth.js'
 import app from '../index.js'
+
+const adminToken = generateTestToken('admin')
 
 const categoryData = {
   id: '550e8400-e29b-41d4-a716-446655440000',
@@ -81,6 +84,7 @@ describe('POST /categories', () => {
 
     const res = await request(app)
       .post('/categories')
+      .set('Authorization', 'Bearer ' + adminToken)
       .send({ name: 'Strength' })
       .expect(201)
 
@@ -91,6 +95,7 @@ describe('POST /categories', () => {
   it('returns 400 with invalid data', async () => {
     const res = await request(app)
       .post('/categories')
+      .set('Authorization', 'Bearer ' + adminToken)
       .send({ name: 'A' }) // min 2 chars
       .expect(400)
 
@@ -100,6 +105,7 @@ describe('POST /categories', () => {
   it('returns 400 when name is missing', async () => {
     const res = await request(app)
       .post('/categories')
+      .set('Authorization', 'Bearer ' + adminToken)
       .send({}) // no name
       .expect(400)
 
@@ -120,6 +126,7 @@ describe('PATCH /categories/:id', () => {
 
     const res = await request(app)
       .patch(`/categories/${categoryData.id}`)
+      .set('Authorization', 'Bearer ' + adminToken)
       .send({ name: 'Hypertrophy' })
       .expect(200)
 
@@ -131,6 +138,7 @@ describe('PATCH /categories/:id', () => {
 
     const res = await request(app)
       .patch('/categories/nonexistent-uuid')
+      .set('Authorization', 'Bearer ' + adminToken)
       .send({ name: 'Test' })
       .expect(404)
 
@@ -151,6 +159,7 @@ describe('DELETE /categories/:id', () => {
 
     const res = await request(app)
       .delete(`/categories/${categoryData.id}`)
+      .set('Authorization', 'Bearer ' + adminToken)
       .expect(200)
 
     expect(res.body).toEqual({ id: categoryData.id, name: categoryData.name })
@@ -161,6 +170,7 @@ describe('DELETE /categories/:id', () => {
 
     const res = await request(app)
       .delete('/categories/nonexistent-uuid')
+      .set('Authorization', 'Bearer ' + adminToken)
       .expect(404)
 
     expect(res.body).toHaveProperty('message')

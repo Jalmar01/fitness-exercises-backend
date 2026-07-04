@@ -1,18 +1,23 @@
 import express from 'express';
 import { ExerciseController } from '../controllers/exercise.controller.js';
+import { authenticate } from '../middleware/auth.js';
+import { authorize } from '../middleware/roles.js';
 
 const router = express.Router();
 
+// Public routes
 router.get('/', ExerciseController.getAll);
 router.get('/:id', ExerciseController.getById);
-router.post('/', ExerciseController.create);
-router.patch('/:id', ExerciseController.update);
-router.delete('/:id', ExerciseController.delete);
-router.patch('/:id/restore', ExerciseController.restore);
-
 router.get('/:exerciseId/muscles', ExerciseController.getMuscles);
-router.post('/:exerciseId/muscles', ExerciseController.addMuscle);
-router.patch('/:exerciseId/muscles/:muscleId', ExerciseController.updateMuscleRole);
-router.delete('/:exerciseId/muscles/:muscleId', ExerciseController.removeMuscle);
+
+// Protected routes
+router.post('/', authenticate, authorize('admin', 'super_admin'), ExerciseController.create);
+router.patch('/:id', authenticate, authorize('admin', 'super_admin'), ExerciseController.update);
+router.delete('/:id', authenticate, authorize('admin', 'super_admin'), ExerciseController.delete);
+router.patch('/:id/restore', authenticate, authorize('admin', 'super_admin'), ExerciseController.restore);
+
+router.post('/:exerciseId/muscles', authenticate, authorize('admin', 'super_admin'), ExerciseController.addMuscle);
+router.patch('/:exerciseId/muscles/:muscleId', authenticate, authorize('admin', 'super_admin'), ExerciseController.updateMuscleRole);
+router.delete('/:exerciseId/muscles/:muscleId', authenticate, authorize('admin', 'super_admin'), ExerciseController.removeMuscle);
 
 export default router;
