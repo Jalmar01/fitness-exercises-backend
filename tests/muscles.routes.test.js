@@ -9,7 +9,10 @@ vi.mock('../config/db.js', () => ({
   },
 }))
 
+import { generateTestToken } from './helpers/auth.js'
 import app from '../index.js'
+
+const adminToken = generateTestToken('admin')
 
 const muscleData = {
   id: '550e8400-e29b-41d4-a716-446655440000',
@@ -118,6 +121,7 @@ describe('POST /muscles', () => {
 
     const res = await request(app)
       .post('/muscles')
+      .set('Authorization', 'Bearer ' + adminToken)
       .send({ name: 'Quadriceps' })
       .expect(201)
 
@@ -128,6 +132,7 @@ describe('POST /muscles', () => {
   it('returns 400 when name is too short', async () => {
     const res = await request(app)
       .post('/muscles')
+      .set('Authorization', 'Bearer ' + adminToken)
       .send({ name: 'A' }) // min 2 chars
       .expect(400)
 
@@ -137,6 +142,7 @@ describe('POST /muscles', () => {
   it('returns 400 when name is too long', async () => {
     const res = await request(app)
       .post('/muscles')
+      .set('Authorization', 'Bearer ' + adminToken)
       .send({ name: 'A'.repeat(26) }) // max 25 chars
       .expect(400)
 
@@ -150,6 +156,7 @@ describe('POST /muscles', () => {
 
     const res = await request(app)
       .post('/muscles')
+      .set('Authorization', 'Bearer ' + adminToken)
       .send({ name: 'Quadriceps' })
       .expect(409)
 
@@ -170,6 +177,7 @@ describe('PATCH /muscles/:id', () => {
 
     const res = await request(app)
       .patch(`/muscles/${muscleData.id}`)
+      .set('Authorization', 'Bearer ' + adminToken)
       .send({ name: 'Hamstrings' })
       .expect(200)
 
@@ -181,6 +189,7 @@ describe('PATCH /muscles/:id', () => {
 
     const res = await request(app)
       .patch('/muscles/nonexistent-uuid')
+      .set('Authorization', 'Bearer ' + adminToken)
       .send({ name: 'Test' })
       .expect(404)
 
@@ -194,6 +203,7 @@ describe('PATCH /muscles/:id', () => {
 
     const res = await request(app)
       .patch(`/muscles/${muscleData.id}`)
+      .set('Authorization', 'Bearer ' + adminToken)
       .send({ name: 'Quadriceps' })
       .expect(409)
 
@@ -214,6 +224,7 @@ describe('DELETE /muscles/:id', () => {
 
     const res = await request(app)
       .delete(`/muscles/${muscleData.id}`)
+      .set('Authorization', 'Bearer ' + adminToken)
       .expect(200)
 
     expect(res.body).toEqual({ id: muscleData.id, name: muscleData.name })
@@ -224,6 +235,7 @@ describe('DELETE /muscles/:id', () => {
 
     const res = await request(app)
       .delete('/muscles/nonexistent-uuid')
+      .set('Authorization', 'Bearer ' + adminToken)
       .expect(404)
 
     expect(res.body).toHaveProperty('message', 'Muscle not found')
@@ -234,6 +246,7 @@ describe('DELETE /muscles/:id', () => {
 
     const res = await request(app)
       .delete(`/muscles/${muscleData.id}`)
+      .set('Authorization', 'Bearer ' + adminToken)
       .expect(404)
 
     expect(res.body).toHaveProperty('message', 'Muscle not found')

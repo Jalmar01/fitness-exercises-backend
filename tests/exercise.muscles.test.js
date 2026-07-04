@@ -9,8 +9,11 @@ vi.mock('../config/db.js', () => ({
   },
 }))
 
+import { generateTestToken } from './helpers/auth.js'
 import { ExerciseModel } from '../models/exercise.js'
 import app from '../index.js'
+
+const adminToken = generateTestToken('admin')
 
 const exerciseId = '550e8400-e29b-41d4-a716-446655440000'
 const muscleId = '660e8400-e29b-41d4-a716-446655440001'
@@ -258,6 +261,7 @@ describe('POST /exercises/:exerciseId/muscles', () => {
 
     const res = await request(app)
       .post(`/exercises/${exerciseId}/muscles`)
+      .set('Authorization', 'Bearer ' + adminToken)
       .send({ muscle_id: muscleId, role: 'primary' })
       .expect(201)
 
@@ -271,6 +275,7 @@ describe('POST /exercises/:exerciseId/muscles', () => {
   it('returns 400 when role is invalid', async () => {
     const res = await request(app)
       .post(`/exercises/${exerciseId}/muscles`)
+      .set('Authorization', 'Bearer ' + adminToken)
       .send({ muscle_id: muscleId, role: 'invalid' })
       .expect(400)
 
@@ -282,6 +287,7 @@ describe('POST /exercises/:exerciseId/muscles', () => {
 
     const res = await request(app)
       .post(`/exercises/${exerciseId}/muscles`)
+      .set('Authorization', 'Bearer ' + adminToken)
       .send({ muscle_id: muscleId, role: 'primary' })
       .expect(404)
 
@@ -294,6 +300,7 @@ describe('POST /exercises/:exerciseId/muscles', () => {
 
     const res = await request(app)
       .post(`/exercises/${exerciseId}/muscles`)
+      .set('Authorization', 'Bearer ' + adminToken)
       .send({ muscle_id: muscleId, role: 'primary' })
       .expect(404)
 
@@ -310,6 +317,7 @@ describe('POST /exercises/:exerciseId/muscles', () => {
 
     const res = await request(app)
       .post(`/exercises/${exerciseId}/muscles`)
+      .set('Authorization', 'Bearer ' + adminToken)
       .send({ muscle_id: muscleId, role: 'primary' })
       .expect(409)
 
@@ -327,6 +335,7 @@ describe('PATCH /exercises/:exerciseId/muscles/:muscleId', () => {
 
     const res = await request(app)
       .patch(`/exercises/${exerciseId}/muscles/${muscleId}`)
+      .set('Authorization', 'Bearer ' + adminToken)
       .send({ role: 'secondary' })
       .expect(200)
 
@@ -342,6 +351,7 @@ describe('PATCH /exercises/:exerciseId/muscles/:muscleId', () => {
 
     const res = await request(app)
       .patch(`/exercises/${exerciseId}/muscles/${muscleId}`)
+      .set('Authorization', 'Bearer ' + adminToken)
       .send({ role: 'primary' })
       .expect(404)
 
@@ -351,6 +361,7 @@ describe('PATCH /exercises/:exerciseId/muscles/:muscleId', () => {
   it('returns 400 when role is invalid', async () => {
     const res = await request(app)
       .patch(`/exercises/${exerciseId}/muscles/${muscleId}`)
+      .set('Authorization', 'Bearer ' + adminToken)
       .send({ role: 'invalid' })
       .expect(400)
 
@@ -368,6 +379,7 @@ describe('DELETE /exercises/:exerciseId/muscles/:muscleId', () => {
 
     const res = await request(app)
       .delete(`/exercises/${exerciseId}/muscles/${muscleId}`)
+      .set('Authorization', 'Bearer ' + adminToken)
       .expect(200)
 
     expect(res.body).toEqual({
@@ -381,6 +393,7 @@ describe('DELETE /exercises/:exerciseId/muscles/:muscleId', () => {
 
     const res = await request(app)
       .delete(`/exercises/${exerciseId}/muscles/${muscleId}`)
+      .set('Authorization', 'Bearer ' + adminToken)
       .expect(404)
 
     expect(res.body).toHaveProperty('message', 'Association not found')

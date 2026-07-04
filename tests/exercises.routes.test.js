@@ -9,7 +9,10 @@ vi.mock('../config/db.js', () => ({
   },
 }))
 
+import { generateTestToken } from './helpers/auth.js'
 import app from '../index.js'
+
+const adminToken = generateTestToken('admin')
 
 const exerciseData = {
   id: '550e8400-e29b-41d4-a716-446655440000',
@@ -32,6 +35,7 @@ describe('DELETE /exercises/:id', () => {
 
     const res = await request(app)
       .delete(`/exercises/${exerciseData.id}`)
+      .set('Authorization', 'Bearer ' + adminToken)
       .expect(200)
 
     expect(res.body).toEqual(exerciseData)
@@ -42,6 +46,7 @@ describe('DELETE /exercises/:id', () => {
 
     const res = await request(app)
       .delete('/exercises/nonexistent-uuid')
+      .set('Authorization', 'Bearer ' + adminToken)
       .expect(404)
 
     expect(res.body).toHaveProperty('message')
@@ -52,6 +57,7 @@ describe('DELETE /exercises/:id', () => {
 
     const res = await request(app)
       .delete(`/exercises/${exerciseData.id}`)
+      .set('Authorization', 'Bearer ' + adminToken)
       .expect(404)
 
     expect(res.body).toHaveProperty('message')
@@ -71,6 +77,7 @@ describe('PATCH /exercises/:id/restore', () => {
 
     const res = await request(app)
       .patch(`/exercises/${exerciseData.id}/restore`)
+      .set('Authorization', 'Bearer ' + adminToken)
       .expect(200)
 
     expect(res.body).toEqual(exerciseData)
@@ -81,6 +88,7 @@ describe('PATCH /exercises/:id/restore', () => {
 
     const res = await request(app)
       .patch('/exercises/nonexistent-uuid/restore')
+      .set('Authorization', 'Bearer ' + adminToken)
       .expect(404)
 
     expect(res.body).toHaveProperty('message')
@@ -91,6 +99,7 @@ describe('PATCH /exercises/:id/restore', () => {
 
     const res = await request(app)
       .patch(`/exercises/${exerciseData.id}/restore`)
+      .set('Authorization', 'Bearer ' + adminToken)
       .expect(404)
 
     expect(res.body).toHaveProperty('message')
