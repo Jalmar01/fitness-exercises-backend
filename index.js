@@ -1,6 +1,6 @@
 import express  from 'express';
 import cors from 'cors';
-import exercisesRouter from './routes/exerceses.js';
+import exercisesRouter from './routes/exercises.js';
 import categoriesRouter from './routes/categories.js';
 import musclesRouter from './routes/muscles.js';
 
