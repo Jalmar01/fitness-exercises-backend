@@ -45,11 +45,4 @@ router.delete('/:id', async (req, res) => {
     res.status(200).json(category);
 });
 
-router.patch('/:id/restore', async (req, res) => {
-    const { id } = req.params;
-    const category = await CategoryModel.restore({ id });
-    if (!category) return res.status(404).json({ message: 'Category not found' });
-    res.status(200).json(category);
-});
-
 export default router;
