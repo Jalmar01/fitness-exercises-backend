@@ -70,5 +70,48 @@ export class ExerciseModel{
 
     // 5. Para cumplir con tu ruta que espera recibir el ejercicio actualizado, hacemos un getById
     return this.getById({ id })
+}
+
+static async delete ({ id }) {
+    // 1. SELECT the exercise first (without is_active filter) so we can return the data before soft-deleting
+    const [rows] = await pool.query(
+        `SELECT BIN_TO_UUID(e.id) AS id, e.name, e.instructions, e.benefits, c.name AS category_name, e.is_active
+         FROM exercises e
+         INNER JOIN categories c ON e.category_id = c.id
+         WHERE e.id = UUID_TO_BIN(?)`,
+        [id]
+    )
+
+    // 2. Not found → return null
+    if (rows.length === 0) return null
+
+    // 3. Already soft-deleted → return null
+    if (!rows[0].is_active) return null
+
+    // 4. Store the exercise data (strip the internal is_active flag)
+    const exercise = rows[0]
+    delete exercise.is_active
+
+    // 5. Soft delete
+    await pool.query(
+        `UPDATE exercises SET is_active = FALSE WHERE id = UUID_TO_BIN(?) AND is_active = TRUE`,
+        [id]
+    )
+
+    // 6. Return the exercise data captured before deletion
+    return exercise
+}
+
+static async restore ({ id }) {
+    const [result] = await pool.query(
+        `UPDATE exercises SET is_active = TRUE WHERE id = UUID_TO_BIN(?) AND is_active = FALSE`,
+        [id]
+    )
+
+    // If no inactive row matched → not found or already active
+    if (result.affectedRows === 0) return null
+
+    // getById filters by is_active = TRUE, so after restore it will find the exercise
+    return this.getById({ id })
 }  
 }
