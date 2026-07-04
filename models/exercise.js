@@ -102,6 +102,79 @@ static async delete ({ id }) {
     return exercise
 }
 
+static async getMuscles ({ exerciseId }) {
+    const [rows] = await pool.query(
+        `SELECT BIN_TO_UUID(em.muscle_id) AS muscle_id, m.name, em.role
+         FROM exercise_muscles em
+         LEFT JOIN muscles m ON em.muscle_id = m.id
+         WHERE em.exercise_id = UUID_TO_BIN(?)`,
+        [exerciseId]
+    )
+    return rows
+}
+
+static async addMuscle ({ exerciseId, muscleId, role }) {
+    // 1. Verify exercise exists (is_active = TRUE)
+    const [exercises] = await pool.query(
+        `SELECT id FROM exercises WHERE id = UUID_TO_BIN(?) AND is_active = TRUE`,
+        [exerciseId]
+    )
+    if (exercises.length === 0) throw new Error('Exercise not found')
+
+    // 2. Verify muscle exists (is_active = TRUE)
+    const [muscles] = await pool.query(
+        `SELECT id FROM muscles WHERE id = UUID_TO_BIN(?) AND is_active = TRUE`,
+        [muscleId]
+    )
+    if (muscles.length === 0) throw new Error('Muscle not found')
+
+    // 3. Insert the association
+    try {
+        await pool.query(
+            `INSERT INTO exercise_muscles (exercise_id, muscle_id, role) VALUES (UUID_TO_BIN(?), UUID_TO_BIN(?), ?)`,
+            [exerciseId, muscleId, role]
+        )
+    } catch (err) {
+        if (err.code === 'ER_DUP_ENTRY') throw new Error('Already associated')
+        throw err
+    }
+
+    return {
+        exercise_id: exerciseId,
+        muscle_id: muscleId,
+        role,
+    }
+}
+
+static async updateMuscleRole ({ exerciseId, muscleId, role }) {
+    const [result] = await pool.query(
+        `UPDATE exercise_muscles SET role = ? WHERE exercise_id = UUID_TO_BIN(?) AND muscle_id = UUID_TO_BIN(?)`,
+        [role, exerciseId, muscleId]
+    )
+
+    if (result.affectedRows === 0) return null
+
+    return {
+        exercise_id: exerciseId,
+        muscle_id: muscleId,
+        role,
+    }
+}
+
+static async removeMuscle ({ exerciseId, muscleId }) {
+    const [result] = await pool.query(
+        `DELETE FROM exercise_muscles WHERE exercise_id = UUID_TO_BIN(?) AND muscle_id = UUID_TO_BIN(?)`,
+        [exerciseId, muscleId]
+    )
+
+    if (result.affectedRows === 0) return null
+
+    return {
+        exercise_id: exerciseId,
+        muscle_id: muscleId,
+    }
+}
+
 static async restore ({ id }) {
     const [result] = await pool.query(
         `UPDATE exercises SET is_active = TRUE WHERE id = UUID_TO_BIN(?) AND is_active = FALSE`,
