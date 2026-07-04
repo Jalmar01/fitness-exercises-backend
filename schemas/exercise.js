@@ -11,3 +11,12 @@ export const exerciseSchema = z.object({
 export const validatePartialSchemas = (input) => {
     return exerciseSchema.partial().safeParse(input)
 }
+
+export const exerciseMuscleSchema = z.object({
+    muscle_id: z.string().uuid(),
+    role: z.enum(['primary', 'secondary']),
+})
+
+export const validatePartialExerciseMuscle = (input) => {
+    return exerciseMuscleSchema.partial().safeParse(input)
+}
